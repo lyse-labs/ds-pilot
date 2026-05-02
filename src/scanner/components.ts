@@ -13,6 +13,7 @@ export interface PropInfo {
   type: string;
   required: boolean;
   defaultValue?: string;
+  variants?: string[];
 }
 
 export interface ComponentWithProps extends ComponentInfo {
@@ -109,11 +110,16 @@ function findPropsDeclaration(
 }
 
 function extractFromInterface(iface: InterfaceDeclaration): PropInfo[] {
-  return iface.getProperties().map((prop) => ({
-    name: prop.getName(),
-    type: prop.getType().getText(),
-    required: !prop.hasQuestionToken(),
-  }));
+  return iface.getProperties().map((prop) => {
+    const typeText = prop.getType().getText();
+    const variants = parseVariants(typeText);
+    return {
+      name: prop.getName(),
+      type: typeText,
+      required: !prop.hasQuestionToken(),
+      ...(variants && { variants }),
+    };
+  });
 }
 
 function extractFromTypeAlias(alias: TypeAliasDeclaration): PropInfo[] {
@@ -121,9 +127,20 @@ function extractFromTypeAlias(alias: TypeAliasDeclaration): PropInfo[] {
   if (!typeNode || typeNode.getKind() !== SyntaxKind.TypeLiteral) return [];
 
   const typeLiteral = typeNode as TypeLiteralNode;
-  return typeLiteral.getProperties().map((prop) => ({
-    name: prop.getName(),
-    type: prop.getType().getText(),
-    required: !prop.hasQuestionToken(),
-  }));
+  return typeLiteral.getProperties().map((prop) => {
+    const typeText = prop.getType().getText();
+    const variants = parseVariants(typeText);
+    return {
+      name: prop.getName(),
+      type: typeText,
+      required: !prop.hasQuestionToken(),
+      ...(variants && { variants }),
+    };
+  });
+}
+
+export function parseVariants(typeText: string): string[] | undefined {
+  const matches = typeText.match(/"([^"]+)"/g);
+  if (!matches || matches.length < 2) return undefined;
+  return matches.map((m) => m.replace(/"/g, ""));
 }

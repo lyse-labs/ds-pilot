@@ -63,6 +63,21 @@ describe("getComponentProps", () => {
     expect(title?.required).toBe(true);
   });
 
+  it("extracts variants from union type props", () => {
+    const components = scanComponents(fixturesDir);
+    const button = components.find((c) => c.name === "Button")!;
+    const props = getComponentProps(button.filePath, "Button");
+
+    const variant = props.find((p) => p.name === "variant");
+    expect(variant?.variants).toEqual(["primary", "secondary", "ghost"]);
+
+    const size = props.find((p) => p.name === "size");
+    expect(size?.variants).toEqual(["sm", "md", "lg"]);
+
+    const disabled = props.find((p) => p.name === "disabled");
+    expect(disabled?.variants).toBeUndefined();
+  });
+
   it("extracts Modal props (React.FC pattern)", () => {
     const components = scanComponents(fixturesDir);
     const modal = components.find((c) => c.name === "Modal")!;
