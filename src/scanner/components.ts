@@ -80,15 +80,24 @@ export function getComponentProps(filePath: string, componentName: string): Prop
   const propsDecl = findPropsDeclaration(interfaces, typeAliases, componentName);
   if (!propsDecl) return [];
 
+  let props: PropInfo[];
   if (propsDecl.getKind() === SyntaxKind.InterfaceDeclaration) {
-    return extractFromInterface(propsDecl as InterfaceDeclaration);
+    props = extractFromInterface(propsDecl as InterfaceDeclaration);
+  } else if (propsDecl.getKind() === SyntaxKind.TypeAliasDeclaration) {
+    props = extractFromTypeAlias(propsDecl as TypeAliasDeclaration);
+  } else {
+    return [];
   }
 
-  if (propsDecl.getKind() === SyntaxKind.TypeAliasDeclaration) {
-    return extractFromTypeAlias(propsDecl as TypeAliasDeclaration);
+  const defaults = extractDefaults(sourceFile, componentName);
+  for (const prop of props) {
+    const def = defaults.get(prop.name);
+    if (def) {
+      prop.defaultValue = def;
+    }
   }
 
-  return [];
+  return props;
 }
 
 function findPropsDeclaration(
@@ -107,6 +116,34 @@ function findPropsDeclaration(
   }
 
   return undefined;
+}
+
+function extractDefaults(sourceFile: ReturnType<Project["addSourceFileAtPath"]>, componentName: string): Map<string, string> {
+  const defaults = new Map<string, string>();
+
+  for (const fn of sourceFile.getFunctions()) {
+    if (fn.getName() !== componentName) continue;
+    const param = fn.getParameters()[0];
+    if (!param) continue;
+    for (const el of param.getDescendantsOfKind(SyntaxKind.BindingElement)) {
+      const init = el.getInitializer();
+      if (init) defaults.set(el.getName(), init.getText());
+    }
+  }
+
+  for (const varDecl of sourceFile.getVariableDeclarations()) {
+    if (varDecl.getName() !== componentName) continue;
+    const arrowFn = varDecl.getInitializerIfKind(SyntaxKind.ArrowFunction);
+    if (!arrowFn) continue;
+    const param = arrowFn.getParameters()[0];
+    if (!param) continue;
+    for (const el of param.getDescendantsOfKind(SyntaxKind.BindingElement)) {
+      const init = el.getInitializer();
+      if (init) defaults.set(el.getName(), init.getText());
+    }
+  }
+
+  return defaults;
 }
 
 function extractFromInterface(iface: InterfaceDeclaration): PropInfo[] {

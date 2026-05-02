@@ -78,6 +78,24 @@ describe("getComponentProps", () => {
     expect(disabled?.variants).toBeUndefined();
   });
 
+  it("extracts default values from destructured params", () => {
+    const components = scanComponents(fixturesDir);
+    const button = components.find((c) => c.name === "Button")!;
+    const props = getComponentProps(button.filePath, "Button");
+
+    const variant = props.find((p) => p.name === "variant");
+    expect(variant?.defaultValue).toBe('"primary"');
+
+    const size = props.find((p) => p.name === "size");
+    expect(size?.defaultValue).toBe('"md"');
+
+    const disabled = props.find((p) => p.name === "disabled");
+    expect(disabled?.defaultValue).toBe("false");
+
+    const label = props.find((p) => p.name === "label");
+    expect(label?.defaultValue).toBeUndefined();
+  });
+
   it("extracts Modal props (React.FC pattern)", () => {
     const components = scanComponents(fixturesDir);
     const modal = components.find((c) => c.name === "Modal")!;
