@@ -1,0 +1,11 @@
+:root {
+  --color-primary: #3B82F6;
+  --color-secondary: #6366F1;
+  --color-neutral-100: #F5F5F5;
+  --color-neutral-900: #171717;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 32px;
+  --typography-heading-font-family: Inter;
+  --typography-heading-font-size: 24px;
+}
