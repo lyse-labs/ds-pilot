@@ -1,6 +1,7 @@
 import { globSync } from "glob";
 import { basename, resolve } from "path";
 import { Project, SyntaxKind, type InterfaceDeclaration, type TypeAliasDeclaration, type TypeLiteralNode } from "ts-morph";
+import { parseVueProps } from "./vue-components.js";
 
 export interface ComponentInfo {
   name: string;
@@ -32,7 +33,7 @@ const IGNORED_PATTERNS = [
 
 export function scanComponents(dir: string): ComponentInfo[] {
   const absDir = resolve(dir);
-  const files = globSync("**/*.{tsx,ts,jsx}", {
+  const files = globSync("**/*.{tsx,ts,jsx,vue}", {
     cwd: absDir,
     absolute: true,
     ignore: IGNORED_PATTERNS,
@@ -42,8 +43,13 @@ export function scanComponents(dir: string): ComponentInfo[] {
   const project = new Project({ skipAddingFilesFromTsConfig: true });
 
   for (const file of files) {
-    const name = basename(file).replace(/\.(tsx|ts|jsx)$/, "");
+    const name = basename(file).replace(/\.(tsx|ts|jsx|vue)$/, "");
     if (name[0] !== name[0].toUpperCase()) continue;
+
+    if (file.endsWith(".vue")) {
+      components.push({ name, filePath: file, exportType: "default" });
+      continue;
+    }
 
     const sourceFile = project.addSourceFileAtPath(file);
 
@@ -71,6 +77,10 @@ export function scanComponents(dir: string): ComponentInfo[] {
 }
 
 export function getComponentProps(filePath: string, componentName: string): PropInfo[] {
+  if (filePath.endsWith(".vue")) {
+    return parseVueProps(filePath, componentName);
+  }
+
   const project = new Project({ skipAddingFilesFromTsConfig: true });
   const sourceFile = project.addSourceFileAtPath(filePath);
 

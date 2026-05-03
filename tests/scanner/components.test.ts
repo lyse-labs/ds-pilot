@@ -32,6 +32,19 @@ describe("scanComponents", () => {
     expect(button?.exportType).toBe("named");
     expect(card?.exportType).toBe("default");
   });
+
+  it("finds Vue components", () => {
+    const components = scanComponents(fixturesDir);
+    const names = components.map((c) => c.name);
+    expect(names).toContain("Input");
+    expect(names).toContain("Tag");
+  });
+
+  it("detects Vue components as default export", () => {
+    const components = scanComponents(fixturesDir);
+    const input = components.find((c) => c.name === "Input");
+    expect(input?.exportType).toBe("default");
+  });
 });
 
 describe("getComponentProps", () => {
@@ -105,5 +118,17 @@ describe("getComponentProps", () => {
     const isOpen = props.find((p) => p.name === "isOpen");
     expect(isOpen?.required).toBe(true);
     expect(isOpen?.type).toContain("boolean");
+  });
+
+  it("extracts Vue component props with defaults and variants", () => {
+    const components = scanComponents(fixturesDir);
+    const input = components.find((c) => c.name === "Input")!;
+    const props = getComponentProps(input.filePath, "Input");
+
+    expect(props.length).toBe(5);
+
+    const type = props.find((p) => p.name === "type");
+    expect(type?.variants).toEqual(["text", "email", "password"]);
+    expect(type?.defaultValue).toBe('"text"');
   });
 });
