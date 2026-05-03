@@ -62,7 +62,14 @@ list
     const tokens = parseTokens(resolve(opts.file));
     const filtered = listTokens(tokens, opts.type);
     for (const t of filtered) {
-      console.log(`  ${t.name}: ${t.value} (${t.type})`);
+      let line = `  ${t.name}: ${t.value} (${t.type})`;
+      if (t.group) {
+        line += ` [${t.group}]`;
+      }
+      if (t.resolvedValue) {
+        line += ` -> ${t.resolvedValue}`;
+      }
+      console.log(line);
     }
     console.log(`\n${filtered.length} tokens found.`);
   });
@@ -99,7 +106,14 @@ program
     console.log("Props:");
     for (const p of result.props) {
       const req = p.required ? "required" : "optional";
-      console.log(`  ${p.name}: ${p.type} (${req})`);
+      let line = `  ${p.name}: ${p.type} (${req})`;
+      if (p.defaultValue) {
+        line += ` = ${p.defaultValue}`;
+      }
+      if (p.variants) {
+        line += ` [${p.variants.join(", ")}]`;
+      }
+      console.log(line);
     }
   });
 
