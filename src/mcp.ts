@@ -13,7 +13,7 @@ interface MCPConfig {
 export async function startMCPServer(config: MCPConfig) {
   const server = new McpServer({
     name: "ds-context",
-    version: "0.1.0",
+    version: "0.2.0",
   });
 
   const components = scanComponents(config.componentsDir);
