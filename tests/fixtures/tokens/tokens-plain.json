@@ -1,0 +1,26 @@
+{
+  "Typography": {
+    "font": {
+      "weight": {
+        "Regular": "Regular",
+        "Bold": "SemiBold"
+      },
+      "size": {
+        "body": {
+          "sm": "14px",
+          "md": "16px"
+        }
+      }
+    }
+  },
+  "Color": {
+    "Background": {
+      "primary": "#1a1a23",
+      "secondary": "#3f3f50"
+    },
+    "Text": {
+      "primary": "#272734",
+      "secondary": "#3f3f50"
+    }
+  }
+}

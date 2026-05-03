@@ -25,7 +25,8 @@ export function parseTokens(filePath: string): Token[] {
   const content = readFileSync(filePath, "utf-8");
 
   if (ext === ".json") {
-    const tokens = parseDTCG(JSON.parse(content));
+    const parsed = JSON.parse(content);
+    const tokens = isDTCG(parsed) ? parseDTCG(parsed) : parsePlainJSON(parsed);
     resolveAliases(tokens);
     return tokens;
   }
@@ -74,6 +75,38 @@ function resolveAliases(tokens: Token[]): void {
       token.resolvedValue = referenced.value;
     }
   }
+}
+
+function isDTCG(obj: Record<string, unknown>): boolean {
+  for (const value of Object.values(obj)) {
+    if (typeof value !== "object" || value === null) continue;
+    const node = value as Record<string, unknown>;
+    if ("$value" in node) return true;
+    if (isDTCG(node)) return true;
+  }
+  return false;
+}
+
+function parsePlainJSON(obj: Record<string, unknown>, prefix = "", group = ""): Token[] {
+  const tokens: Token[] = [];
+
+  for (const [key, value] of Object.entries(obj)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+
+    if (typeof value === "object" && value !== null) {
+      tokens.push(...parsePlainJSON(value as Record<string, unknown>, path, group || key));
+    } else if (typeof value === "string" || typeof value === "number") {
+      const strValue = String(value);
+      tokens.push({
+        name: path,
+        value: strValue,
+        type: inferType(strValue),
+        group: group || key,
+      });
+    }
+  }
+
+  return tokens;
 }
 
 function inferType(value: string): string {

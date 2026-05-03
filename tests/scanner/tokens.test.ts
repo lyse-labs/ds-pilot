@@ -103,6 +103,34 @@ describe("parseTokens", () => {
     });
   });
 
+  describe("Plain nested JSON format (Figma export)", () => {
+    it("parses nested values as tokens", () => {
+      const tokens = parseTokens(resolve(fixturesDir, "tokens-plain.json"));
+
+      const bgPrimary = tokens.find((t) => t.name === "Color.Background.primary");
+      expect(bgPrimary?.value).toBe("#1a1a23");
+      expect(bgPrimary?.type).toBe("color");
+      expect(bgPrimary?.group).toBe("Color");
+    });
+
+    it("infers types from values", () => {
+      const tokens = parseTokens(resolve(fixturesDir, "tokens-plain.json"));
+
+      const fontSize = tokens.find((t) => t.name === "Typography.font.size.body.md");
+      expect(fontSize?.value).toBe("16px");
+      expect(fontSize?.type).toBe("dimension");
+
+      const fontWeight = tokens.find((t) => t.name === "Typography.font.weight.Regular");
+      expect(fontWeight?.value).toBe("Regular");
+      expect(fontWeight?.type).toBe("string");
+    });
+
+    it("parses all tokens", () => {
+      const tokens = parseTokens(resolve(fixturesDir, "tokens-plain.json"));
+      expect(tokens.length).toBe(8);
+    });
+  });
+
   it("throws on unsupported format", () => {
     expect(() => parseTokens("tokens.yaml")).toThrow("Unsupported token file format");
   });
