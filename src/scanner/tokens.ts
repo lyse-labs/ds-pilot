@@ -5,6 +5,8 @@ export interface Token {
   name: string;
   value: string;
   type: string;
+  group?: string;
+  resolvedValue?: string;
 }
 
 interface DTCGNode {
@@ -23,7 +25,9 @@ export function parseTokens(filePath: string): Token[] {
   const content = readFileSync(filePath, "utf-8");
 
   if (ext === ".json") {
-    return parseDTCG(JSON.parse(content));
+    const tokens = parseDTCG(JSON.parse(content));
+    resolveAliases(tokens);
+    return tokens;
   }
 
   if (ext === ".css") {
@@ -33,7 +37,7 @@ export function parseTokens(filePath: string): Token[] {
   return [];
 }
 
-function parseDTCG(obj: Record<string, unknown>, prefix = ""): Token[] {
+function parseDTCG(obj: Record<string, unknown>, prefix = "", group = ""): Token[] {
   const tokens: Token[] = [];
 
   for (const [key, value] of Object.entries(obj)) {
@@ -47,13 +51,42 @@ function parseDTCG(obj: Record<string, unknown>, prefix = ""): Token[] {
         name: path,
         value: String(node.$value),
         type: String(node.$type || "unknown"),
+        group: group || key,
       });
     } else if (typeof node === "object" && node !== null) {
-      tokens.push(...parseDTCG(node as Record<string, unknown>, path));
+      tokens.push(...parseDTCG(node as Record<string, unknown>, path, group || key));
     }
   }
 
   return tokens;
+}
+
+function resolveAliases(tokens: Token[]): void {
+  const tokenMap = new Map(tokens.map((t) => [t.name, t]));
+
+  for (const token of tokens) {
+    const aliasMatch = token.value.match(/^\{(.+)\}$/);
+    if (!aliasMatch) continue;
+
+    const referencedName = aliasMatch[1];
+    const referenced = tokenMap.get(referencedName);
+    if (referenced) {
+      token.resolvedValue = referenced.value;
+    }
+  }
+}
+
+function inferType(value: string): string {
+  if (value.startsWith("#") || value.startsWith("rgb") || value.startsWith("hsl")) {
+    return "color";
+  }
+  if (value.endsWith("px") || value.endsWith("rem") || value.endsWith("em")) {
+    return "dimension";
+  }
+  if (/^[\d.]+$/.test(value)) {
+    return "number";
+  }
+  return "string";
 }
 
 function parseCSS(content: string): Token[] {
@@ -67,18 +100,7 @@ function parseCSS(content: string): Token[] {
     const value = match[2].trim();
     const name = rawName.replace(/-/g, ".");
 
-    let type = "unknown";
-    if (value.startsWith("#") || value.startsWith("rgb") || value.startsWith("hsl")) {
-      type = "color";
-    } else if (value.endsWith("px") || value.endsWith("rem") || value.endsWith("em")) {
-      type = "dimension";
-    } else if (/^[\d.]+$/.test(value)) {
-      type = "number";
-    } else {
-      type = "string";
-    }
-
-    tokens.push({ name, value, type });
+    tokens.push({ name, value, type: inferType(value) });
   }
 
   return tokens;

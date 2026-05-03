@@ -68,6 +68,7 @@ describe("getToken", () => {
       name: "color.primary",
       value: "#3B82F6",
       type: "color",
+      group: "color",
     });
   });
 

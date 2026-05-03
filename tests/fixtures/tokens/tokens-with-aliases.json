@@ -1,0 +1,26 @@
+{
+  "color": {
+    "primary": {
+      "$value": "#3B82F6",
+      "$type": "color"
+    },
+    "secondary": {
+      "$value": "#6366F1",
+      "$type": "color"
+    }
+  },
+  "button": {
+    "background": {
+      "$value": "{color.primary}",
+      "$type": "color"
+    },
+    "border": {
+      "$value": "{color.secondary}",
+      "$type": "color"
+    },
+    "text": {
+      "$value": "#FFFFFF",
+      "$type": "color"
+    }
+  }
+}

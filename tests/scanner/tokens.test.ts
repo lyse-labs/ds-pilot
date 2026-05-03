@@ -13,6 +13,7 @@ describe("parseTokens", () => {
         name: "color.primary",
         value: "#3B82F6",
         type: "color",
+        group: "color",
       });
     });
 
@@ -23,6 +24,7 @@ describe("parseTokens", () => {
         name: "color.neutral.100",
         value: "#F5F5F5",
         type: "color",
+        group: "color",
       });
     });
 
@@ -33,12 +35,38 @@ describe("parseTokens", () => {
         name: "spacing.md",
         value: "16px",
         type: "dimension",
+        group: "spacing",
       });
     });
 
     it("parses all tokens", () => {
       const tokens = parseTokens(resolve(fixturesDir, "tokens.json"));
       expect(tokens.length).toBe(9);
+    });
+
+    it("detects alias references and resolves them", () => {
+      const tokens = parseTokens(resolve(fixturesDir, "tokens-with-aliases.json"));
+
+      const btnBg = tokens.find((t) => t.name === "button.background");
+      expect(btnBg?.value).toBe("{color.primary}");
+      expect(btnBg?.resolvedValue).toBe("#3B82F6");
+
+      const btnBorder = tokens.find((t) => t.name === "button.border");
+      expect(btnBorder?.value).toBe("{color.secondary}");
+      expect(btnBorder?.resolvedValue).toBe("#6366F1");
+
+      const btnText = tokens.find((t) => t.name === "button.text");
+      expect(btnText?.resolvedValue).toBeUndefined();
+    });
+
+    it("adds group metadata to tokens", () => {
+      const tokens = parseTokens(resolve(fixturesDir, "tokens-with-aliases.json"));
+
+      const btnBg = tokens.find((t) => t.name === "button.background");
+      expect(btnBg?.group).toBe("button");
+
+      const primary = tokens.find((t) => t.name === "color.primary");
+      expect(primary?.group).toBe("color");
     });
   });
 
