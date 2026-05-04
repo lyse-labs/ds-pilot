@@ -13,7 +13,7 @@ interface MCPConfig {
 export async function startMCPServer(config: MCPConfig) {
   const server = new McpServer({
     name: "ds-pilot",
-    version: "0.2.0",
+    version: "0.2.1",
   });
 
   const components = scanComponents(config.componentsDir);

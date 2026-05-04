@@ -5,12 +5,12 @@ MCP server that exposes your design system (components + tokens) to AI agents. P
 ## Install
 
 ```bash
-npx ds-pilot init
+npx @lyse-labs/ds-pilot init
 ```
 
 This will:
 - Detect your components directory and tokens file
-- Configure the MCP server in `.claude/settings.local.json`
+- Configure the MCP server in `.mcp.json`
 - Add design system instructions to your `CLAUDE.md`
 
 ## Usage
@@ -18,7 +18,7 @@ This will:
 ### MCP Server (for AI agents)
 
 ```bash
-npx ds-pilot serve --components ./src/components --tokens ./tokens.json
+npx @lyse-labs/ds-pilot serve --components ./src/components --tokens ./tokens.json
 ```
 
 Once configured, your AI agent can:
@@ -31,16 +31,16 @@ Once configured, your AI agent can:
 
 ```bash
 # List all components
-npx ds-pilot list components --dir ./src/components
+npx @lyse-labs/ds-pilot list components --dir ./src/components
 
 # List tokens filtered by type
-npx ds-pilot list tokens --file ./tokens.json --type color
+npx @lyse-labs/ds-pilot list tokens --file ./tokens.json --type color
 
 # Search components
-npx ds-pilot search button --dir ./src/components
+npx @lyse-labs/ds-pilot search button --dir ./src/components
 
 # Show component props
-npx ds-pilot props Button --dir ./src/components
+npx @lyse-labs/ds-pilot props Button --dir ./src/components
 ```
 
 ## Supported Formats

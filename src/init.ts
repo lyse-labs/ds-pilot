@@ -6,6 +6,7 @@ const CLAUDE_MD_SECTION = `
 ## Design System
 
 Before creating a new component, use the \`search_components\` tool to check if a similar component already exists.
+Use \`get_component_props\` to inspect a component's props, types, and defaults before using it.
 Use \`list_tokens\` and \`get_token\` to find design tokens instead of hardcoding colors, spacing, or typography values.
 `;
 
@@ -67,20 +68,19 @@ function detectTokensFile(cwd: string): string | null {
 }
 
 function writeSettings(cwd: string, componentsDir: string, tokensFile: string | null): boolean {
-  const settingsDir = resolve(cwd, ".claude");
-  const settingsFile = join(settingsDir, "settings.local.json");
+  const mcpFile = resolve(cwd, ".mcp.json");
 
-  if (!existsSync(settingsDir)) {
-    mkdirSync(settingsDir, { recursive: true });
+  let config: Record<string, unknown> = {};
+  if (existsSync(mcpFile)) {
+    try {
+      config = JSON.parse(readFileSync(mcpFile, "utf-8"));
+    } catch {
+      console.warn("Warning: existing .mcp.json contains invalid JSON. Overwriting.");
+    }
   }
 
-  let settings: Record<string, unknown> = {};
-  if (existsSync(settingsFile)) {
-    settings = JSON.parse(readFileSync(settingsFile, "utf-8"));
-  }
-
-  const mcpServers = (settings.mcpServers as Record<string, unknown>) || {};
-  const args = ["ds-pilot", "serve", "--components", componentsDir];
+  const mcpServers = (config.mcpServers as Record<string, unknown>) || {};
+  const args = ["-y", "@lyse-labs/ds-pilot", "serve", "--components", componentsDir];
   if (tokensFile) {
     args.push("--tokens", tokensFile);
   }
@@ -90,8 +90,8 @@ function writeSettings(cwd: string, componentsDir: string, tokensFile: string | 
     args,
   };
 
-  settings.mcpServers = mcpServers;
-  writeFileSync(settingsFile, JSON.stringify(settings, null, 2) + "\n");
+  config.mcpServers = mcpServers;
+  writeFileSync(mcpFile, JSON.stringify(config, null, 2) + "\n");
   return true;
 }
 
