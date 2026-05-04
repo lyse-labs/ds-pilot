@@ -1,11 +1,11 @@
 {
-  "name": "ds-context",
+  "name": "@lyse-labs/ds-pilot",
   "version": "0.2.0",
   "description": "MCP server that exposes your design system (components + tokens) to AI agents",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "ds-context": "dist/index.js"
+    "ds-pilot": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",

@@ -1,11 +1,11 @@
-# ds-context
+# ds-pilot
 
 MCP server that exposes your design system (components + tokens) to AI agents. Prevents the agent from creating duplicate components or hardcoding values that should be tokens.
 
 ## Install
 
 ```bash
-npx ds-context init
+npx ds-pilot init
 ```
 
 This will:
@@ -18,7 +18,7 @@ This will:
 ### MCP Server (for AI agents)
 
 ```bash
-npx ds-context serve --components ./src/components --tokens ./tokens.json
+npx ds-pilot serve --components ./src/components --tokens ./tokens.json
 ```
 
 Once configured, your AI agent can:
@@ -31,28 +31,31 @@ Once configured, your AI agent can:
 
 ```bash
 # List all components
-npx ds-context list components --dir ./src/components
+npx ds-pilot list components --dir ./src/components
 
 # List tokens filtered by type
-npx ds-context list tokens --file ./tokens.json --type color
+npx ds-pilot list tokens --file ./tokens.json --type color
 
 # Search components
-npx ds-context search button --dir ./src/components
+npx ds-pilot search button --dir ./src/components
 
 # Show component props
-npx ds-context props Button --dir ./src/components
+npx ds-pilot props Button --dir ./src/components
 ```
 
 ## Supported Formats
 
 ### Components
-- React (`.tsx`, `.ts`, `.jsx`)
+- React (`.tsx`, `.ts`, `.jsx`, `.js`)
+- Vue / Nuxt (`.vue` with `<script setup lang="ts">`)
+- Props with types, defaults, and structured variants
 - Named and default exports
-- Props extracted via TypeScript AST
 
 ### Tokens
 - DTCG JSON (W3C standard)
+- Plain nested JSON (Figma export)
 - CSS Custom Properties
+- Alias resolution and group metadata
 
 ## How It Works
 

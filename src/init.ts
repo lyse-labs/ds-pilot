@@ -80,12 +80,12 @@ function writeSettings(cwd: string, componentsDir: string, tokensFile: string | 
   }
 
   const mcpServers = (settings.mcpServers as Record<string, unknown>) || {};
-  const args = ["ds-context", "serve", "--components", componentsDir];
+  const args = ["ds-pilot", "serve", "--components", componentsDir];
   if (tokensFile) {
     args.push("--tokens", tokensFile);
   }
 
-  mcpServers["ds-context"] = {
+  mcpServers["ds-pilot"] = {
     command: "npx",
     args,
   };

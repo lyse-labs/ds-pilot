@@ -11,16 +11,16 @@ import { runInit } from "./init.js";
 const program = new Command();
 
 program
-  .name("ds-context")
+  .name("ds-pilot")
   .description("Expose your design system to AI agents via MCP")
   .version("0.2.0");
 
 program
   .command("init")
-  .description("Configure ds-context for your project (MCP + CLAUDE.md)")
+  .description("Configure ds-pilot for your project (MCP + CLAUDE.md)")
   .action(() => {
     const result = runInit();
-    console.log("ds-context initialized:");
+    console.log("ds-pilot initialized:");
     console.log(`  Components: ${result.componentsDir}`);
     console.log(`  Tokens: ${result.tokensFile || "not found"}`);
     console.log(`  CLAUDE.md: ${result.claudeMdUpdated ? "updated" : "already configured"}`);

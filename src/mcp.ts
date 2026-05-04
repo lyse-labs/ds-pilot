@@ -12,7 +12,7 @@ interface MCPConfig {
 
 export async function startMCPServer(config: MCPConfig) {
   const server = new McpServer({
-    name: "ds-context",
+    name: "ds-pilot",
     version: "0.2.0",
   });
 
