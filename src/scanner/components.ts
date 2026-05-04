@@ -28,12 +28,14 @@ const IGNORED_PATTERNS = [
   "**/*.d.ts",
   "**/index.ts",
   "**/index.tsx",
+  "**/index.js",
+  "**/index.jsx",
   "**/__tests__/**",
 ];
 
 export function scanComponents(dir: string): ComponentInfo[] {
   const absDir = resolve(dir);
-  const files = globSync("**/*.{tsx,ts,jsx,vue}", {
+  const files = globSync("**/*.{tsx,ts,jsx,js,vue}", {
     cwd: absDir,
     absolute: true,
     ignore: IGNORED_PATTERNS,
@@ -43,7 +45,7 @@ export function scanComponents(dir: string): ComponentInfo[] {
   const project = new Project({ skipAddingFilesFromTsConfig: true });
 
   for (const file of files) {
-    const name = basename(file).replace(/\.(tsx|ts|jsx|vue)$/, "");
+    const name = basename(file).replace(/\.(tsx|ts|jsx|js|vue)$/, "");
     if (name[0] !== name[0].toUpperCase()) continue;
 
     if (file.endsWith(".vue")) {
