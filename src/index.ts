@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name("ds-pilot")
   .description("Expose your design system to AI agents via MCP")
-  .version("0.2.1");
+  .version("0.2.2");
 
 program
   .command("init")

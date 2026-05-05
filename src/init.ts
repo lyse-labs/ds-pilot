@@ -28,19 +28,40 @@ export function runInit(cwd: string = process.cwd()): InitResult {
 }
 
 function detectComponentsDir(cwd: string): string {
-  const candidates = [
-    "src/components",
-    "components",
-    "src/ui",
-    "app/components",
-    "lib/components",
-  ];
+  // Find the directory with the most component files
+  const componentFiles = globSync("**/*.{vue,tsx,jsx}", {
+    cwd,
+    ignore: ["**/node_modules/**", "**/dist/**", "**/.nuxt/**", "**/.next/**", "**/.output/**"],
+    absolute: false,
+  });
 
-  for (const dir of candidates) {
-    if (existsSync(resolve(cwd, dir))) return `./${dir}`;
+  if (componentFiles.length === 0) return "./src/components";
+
+  // Count files per top-level directory path
+  const dirCounts = new Map<string, number>();
+  for (const file of componentFiles) {
+    const parts = file.split("/");
+    // Find the deepest "components" directory in the path
+    const compIdx = parts.lastIndexOf("components");
+    if (compIdx !== -1) {
+      const dir = parts.slice(0, compIdx + 1).join("/");
+      dirCounts.set(dir, (dirCounts.get(dir) || 0) + 1);
+    }
   }
 
-  return "./src/components";
+  if (dirCounts.size === 0) {
+    // No "components" directory found, use the most common parent
+    for (const file of componentFiles) {
+      const dir = file.split("/").slice(0, -1).join("/");
+      if (dir) dirCounts.set(dir, (dirCounts.get(dir) || 0) + 1);
+    }
+  }
+
+  if (dirCounts.size === 0) return "./src/components";
+
+  // Return the directory with the most component files
+  const bestDir = [...dirCounts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+  return `./${bestDir}`;
 }
 
 function detectTokensFile(cwd: string): string | null {
