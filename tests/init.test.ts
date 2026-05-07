@@ -24,15 +24,15 @@ describe("init - skill installation", () => {
     rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it("installs skill to .claude/skills/ds-pilot-use/SKILL.md", () => {
+  it("installs skill to .claude/skills/using-ds-pilot/SKILL.md", () => {
     const result = runInit(tmpDir);
 
     expect(result.skillInstalled).toBe(true);
-    const skillPath = resolve(tmpDir, ".claude/skills/ds-pilot-use/SKILL.md");
+    const skillPath = resolve(tmpDir, ".claude/skills/using-ds-pilot/SKILL.md");
     expect(existsSync(skillPath)).toBe(true);
 
     const content = readFileSync(skillPath, "utf-8");
-    expect(content).toContain("name: ds-pilot-use");
+    expect(content).toContain("name: using-ds-pilot");
     expect(content).toContain("search_components");
     expect(content).toContain("get_component_props");
     expect(content).toContain("list_tokens");
@@ -62,7 +62,7 @@ describe("init - skill installation", () => {
     const result = runInit(tmpDir);
 
     expect(result.skillInstalled).toBe(true);
-    const skillPath = resolve(tmpDir, ".claude/skills/ds-pilot-use/SKILL.md");
+    const skillPath = resolve(tmpDir, ".claude/skills/using-ds-pilot/SKILL.md");
     expect(existsSync(skillPath)).toBe(true);
   });
 });

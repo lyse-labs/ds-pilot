@@ -1,5 +1,5 @@
 ---
-name: ds-pilot-use
+name: using-ds-pilot
 description: "Use when creating or modifying UI components — always check the design system for existing components and tokens before writing code"
 ---
 

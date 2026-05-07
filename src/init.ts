@@ -11,7 +11,7 @@ Use \`list_tokens\` and \`get_token\` to find design tokens instead of hardcodin
 `;
 
 const SKILL_CONTENT = `---
-name: ds-pilot-use
+name: using-ds-pilot
 description: "Use when creating or modifying UI components — always check the design system for existing components and tokens before writing code"
 ---
 
@@ -136,7 +136,7 @@ function writeSettings(cwd: string, componentsDir: string, tokensFile: string | 
 
 function installSkill(cwd: string): boolean {
   try {
-    const skillDir = resolve(cwd, ".claude", "skills", "ds-pilot-use");
+    const skillDir = resolve(cwd, ".claude", "skills", "using-ds-pilot");
     mkdirSync(skillDir, { recursive: true });
     writeFileSync(resolve(skillDir, "SKILL.md"), SKILL_CONTENT);
     return true;

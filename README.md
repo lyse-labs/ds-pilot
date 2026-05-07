@@ -11,7 +11,7 @@ npx @lyse-labs/ds-pilot init
 This will:
 - Detect your components directory and tokens file
 - Configure the MCP server in `.mcp.json`
-- Add design system instructions to your `CLAUDE.md`
+- Install the `using-ds-pilot` skill to `.claude/skills/` (or fall back to `CLAUDE.md` instructions if skills are not supported)
 
 ## Usage
 
@@ -61,7 +61,7 @@ npx @lyse-labs/ds-pilot props Button --dir ./src/components
 
 1. **Scanner** reads your codebase and extracts component names, props, and token values
 2. **MCP Server** exposes this data as tools an AI agent can call
-3. **CLAUDE.md** instructions tell the agent to check for existing components before creating new ones
+3. **Skill** (or `CLAUDE.md` fallback) tells Claude to check for existing components and tokens before writing UI code
 
 The agent stops guessing and starts reusing.
 
