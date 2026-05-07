@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { resolve, join } from "path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from "fs";
+import { resolve } from "path";
 import { globSync } from "glob";
 
 const CLAUDE_MD_SECTION = `
@@ -10,10 +10,26 @@ Use \`get_component_props\` to inspect a component's props, types, and defaults 
 Use \`list_tokens\` and \`get_token\` to find design tokens instead of hardcoding colors, spacing, or typography values.
 `;
 
+const SKILL_CONTENT = `---
+name: ds-pilot-use
+description: "Use when creating or modifying UI components — always check the design system for existing components and tokens before writing code"
+---
+
+# ds-pilot: Design System Tools
+
+Before writing UI code, use the design system MCP tools:
+
+- **Before creating a component** — call \`search_components\` to check if a similar component already exists. If one does, inform the user and suggest using it instead of creating a duplicate.
+- **Before modifying a component** — call \`get_component_props\` to understand its current props, defaults, and variants.
+- **Before hardcoding a value** (color, spacing, font size, etc.) — call \`list_tokens\` or \`get_token\` to find the corresponding design token.
+`;
+
 interface InitResult {
   componentsDir: string;
   tokensFile: string | null;
+  skillInstalled: boolean;
   claudeMdUpdated: boolean;
+  claudeMdCleaned: boolean;
   settingsUpdated: boolean;
 }
 
@@ -22,9 +38,11 @@ export function runInit(cwd: string = process.cwd()): InitResult {
   const tokensFile = detectTokensFile(cwd);
 
   const settingsUpdated = writeSettings(cwd, componentsDir, tokensFile);
-  const claudeMdUpdated = updateClaudeMd(cwd);
+  const skillInstalled = installSkill(cwd);
+  const claudeMdCleaned = skillInstalled ? cleanClaudeMdSection(cwd) : false;
+  const claudeMdUpdated = skillInstalled ? false : updateClaudeMd(cwd);
 
-  return { componentsDir, tokensFile, claudeMdUpdated, settingsUpdated };
+  return { componentsDir, tokensFile, skillInstalled, claudeMdUpdated, claudeMdCleaned, settingsUpdated };
 }
 
 function detectComponentsDir(cwd: string): string {
@@ -113,6 +131,34 @@ function writeSettings(cwd: string, componentsDir: string, tokensFile: string | 
 
   config.mcpServers = mcpServers;
   writeFileSync(mcpFile, JSON.stringify(config, null, 2) + "\n");
+  return true;
+}
+
+function installSkill(cwd: string): boolean {
+  try {
+    const skillDir = resolve(cwd, ".claude", "skills", "ds-pilot-use");
+    mkdirSync(skillDir, { recursive: true });
+    writeFileSync(resolve(skillDir, "SKILL.md"), SKILL_CONTENT);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function cleanClaudeMdSection(cwd: string): boolean {
+  const claudeMdPath = resolve(cwd, "CLAUDE.md");
+
+  if (!existsSync(claudeMdPath)) return false;
+
+  const content = readFileSync(claudeMdPath, "utf-8");
+  if (!content.includes(CLAUDE_MD_SECTION)) return false;
+
+  const cleaned = content.replace(CLAUDE_MD_SECTION, "");
+  if (cleaned.trim() === "") {
+    unlinkSync(claudeMdPath);
+  } else {
+    writeFileSync(claudeMdPath, cleaned);
+  }
   return true;
 }
 

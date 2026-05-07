@@ -17,14 +17,15 @@ program
 
 program
   .command("init")
-  .description("Configure ds-pilot for your project (MCP + CLAUDE.md)")
+  .description("Configure ds-pilot for your project (MCP + skill)")
   .action(() => {
     const result = runInit();
     console.log("ds-pilot initialized:");
     console.log(`  Components: ${result.componentsDir}`);
     console.log(`  Tokens: ${result.tokensFile || "not found"}`);
-    console.log(`  CLAUDE.md: ${result.claudeMdUpdated ? "updated" : "already configured"}`);
-    console.log(`  Settings: ${result.settingsUpdated ? "configured" : "already configured"}`);
+    console.log(`  Skill: ${result.skillInstalled ? "installed" : "failed (CLAUDE.md fallback used)"}`);
+    if (result.claudeMdCleaned) console.log(`  CLAUDE.md: old section removed`);
+    console.log(`  MCP: ${result.settingsUpdated ? "configured" : "already configured"}`);
   });
 
 program
