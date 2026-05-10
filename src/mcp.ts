@@ -1,8 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { scanComponents } from "./scanner/components.js";
-import { parseTokens, type Token } from "./scanner/tokens.js";
+import { createScannerCache } from "./scanner/cache.js";
 import { searchComponents, getComponentWithProps, listTokens, getToken } from "./tools.js";
 
 interface MCPConfig {
@@ -13,11 +12,10 @@ interface MCPConfig {
 export async function startMCPServer(config: MCPConfig) {
   const server = new McpServer({
     name: "ds-pilot",
-    version: "0.2.2",
+    version: "0.3.2",
   });
 
-  const components = scanComponents(config.componentsDir);
-  const tokens: Token[] = config.tokensFile ? parseTokens(config.tokensFile) : [];
+  const cache = createScannerCache(config.componentsDir, config.tokensFile);
 
   server.tool(
     "search_components",
@@ -25,7 +23,7 @@ export async function startMCPServer(config: MCPConfig) {
     { query: z.string().describe("Search term (e.g. 'button', 'card', 'modal')") },
     async ({ query }) => {
       try {
-        const results = searchComponents(components, query);
+        const results = searchComponents(cache.getComponents(), query);
         return {
           content: [{ type: "text" as const, text: JSON.stringify(results, null, 2) }],
         };
@@ -44,7 +42,7 @@ export async function startMCPServer(config: MCPConfig) {
     { name: z.string().describe("Exact component name (e.g. 'Button', 'Card')") },
     async ({ name }) => {
       try {
-        const result = getComponentWithProps(components, name);
+        const result = getComponentWithProps(cache.getComponents(), name);
         if (!result) {
           return {
             content: [{ type: "text" as const, text: `Component "${name}" not found. Use search_components to find available components.` }],
@@ -68,7 +66,7 @@ export async function startMCPServer(config: MCPConfig) {
     { type: z.string().optional().describe("Token type filter (e.g. 'color', 'dimension')") },
     async ({ type }) => {
       try {
-        const results = listTokens(tokens, type);
+        const results = listTokens(cache.getTokens(), type);
         return {
           content: [{ type: "text" as const, text: JSON.stringify(results, null, 2) }],
         };
@@ -87,7 +85,7 @@ export async function startMCPServer(config: MCPConfig) {
     { name: z.string().describe("Token name in dot notation (e.g. 'color.primary', 'spacing.md')") },
     async ({ name }) => {
       try {
-        const result = getToken(tokens, name);
+        const result = getToken(cache.getTokens(), name);
         if (!result) {
           return {
             content: [{ type: "text" as const, text: `Token "${name}" not found. Use list_tokens to see available tokens.` }],
